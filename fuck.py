@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-import os,sys,time,threading
+import os,sys,time
 
-sys.path.append('..')
-from common import logviewer, tcpserver
-from common.settings import Settings, SSLSettings
+import logviewer
+import tcpserver
+from settings_loader import Settings, SSLSettings
 SETTINGS = Settings('settings.py')
 SSLSETTINGS = SSLSettings(SETTINGS.CERTFILE, SETTINGS.KEYFILE)
 
@@ -17,6 +17,33 @@ class HttpHandler(tcpserver.ConnectionHandler):
             request = self.sock.read()
         self.sock.write("HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n")
 
+class SmtpHandler(tcpserver.ConnectionHandler):
+    def handle(self):
+        print self.host + ': RX begin >>>>'
+
+        self.sock.send('220 ' + SETTINGS.FQDN + ' ESMTP Postfix\n')
+        self.recvline()
+        self.sock.send('250 ' + SETTINGS.FQDN + ', I am glad to meet you\n')
+
+        while True:
+            l = self.recvline()
+            if l.startswith('DATA'):
+                self.sock.send('354 End data with <CR><LF>.<CR><LF>\n')
+                break
+            self.sock.send('250 Ok\n')
+
+        while True:
+            l = self.recvline()
+            if l == '.\r\n':
+                break
+        self.sock.send('250 Ok: queued as 12345\n')
+
+        while True:
+            l = self.recvline()
+            if l.startswith('QUIT'):
+                break
+        print self.host + ': Successfully RX <<<<'
+
 def main():
     if not os.path.exists(SETTINGS.LOG_DIR):
         os.makedirs(SETTINGS.LOG_DIR)
@@ -29,6 +56,7 @@ def main():
     tcpserver.DumpingServer(443, True, HttpHandler, SETTINGS.LOG_DIR, SSLSETTINGS, SETTINGS.ANON).start()
     tcpserver.DumpingServer(6969, False, HttpHandler, SETTINGS.LOG_DIR, None, True).start()
     tcpserver.DumpingServer(6970, True, HttpHandler, SETTINGS.LOG_DIR, SSLSETTINGS, True).start()
+    tcpserver.DumpingServer(25, False, SmtpHandler, SETTINGS.LOG_DIR, None, SETTINGS.ANON).start()
 
     try:
         while True:

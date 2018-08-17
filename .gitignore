@@ -1,2 +1,5 @@
 *.pem
 .idea
+logs
+motd.txt
+settings.py

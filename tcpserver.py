@@ -1,6 +1,6 @@
 import socket
 import threading
-import struct, os, time,sys,ssl,traceback
+import struct, os, time,sys, traceback
 
 import tubes
 
