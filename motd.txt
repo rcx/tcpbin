@@ -1,0 +1,10 @@
+Low-level http(s)/smtp bin
+
+A simple socket server on 80/tcp and 443/tls is configured to dump all incoming data to this directory.
+A simple mail server on 25/tcp will dump all incoming emails.
+Logs are cleared regularly.
+
+WARNING: Your internet-facing IP will be made available.
+An anonymous ephemeral file-hosting service is available at 6969/tcp and 6970/tls.
+
+Fork me at https://github.com/ecx86/tcpbin
