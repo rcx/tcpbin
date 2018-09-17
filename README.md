@@ -2,7 +2,7 @@
 
 It sets up TCP sockets on ports 80(http), 443(https), 25(smtp) to listen for incoming data. Then it dumps these to a log folder which can be viewed on port 8000(https).
 
-You can configure everything in `settings.py` or `fuck.py`. See the "Additional Configuration" section below. 
+You can configure everything in`tcpbin.py`. See the "Additional Configuration" section below. 
 
 ## Quick start
 
@@ -11,15 +11,14 @@ git clone https://github.com/ecx86/tcpbin.git
 cd tcpbin
 ln -s /etc/example.com/cert.pem cert.pem
 ln -s /etc/example.com/privkey.pem privkey.pem
-nano settings.py # do your magic here
 nano motd.txt # optional motd
 service apache2 stop # or nginx
-nohup python fuck.py > /var/log/tcpbin.log &
+nohup python tcpbin.py > /var/log/tcpbin.log &
 ```
 
 ## Advanced configuration
 
-You can configure the following settings in `settings.py`:
+You can configure the following settings in `tcpbin.py`:
 
 - **MOTD_FILE**: filename. Will be copied to the log directory on each startup. This is because I am too lazy and incompetent to setup proper routes handlers in the log viewer http server.
 - **LOG_DIR**: filename. Will be created if it doesn't exist. All the logs get dumped to here and everything in the folder will be available to access on the log viewing server.

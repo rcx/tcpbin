@@ -1,9 +1,0 @@
-MOTD_FILE='motd.txt'
-LOG_DIR='logs'
-LOG_VIEWER_PORT=8000
-LOG_VIEWER_HTTPS=True
-AUTHKEY='admin:password'
-CERTFILE='cert.pem'
-KEYFILE='privkey.pem'
-ANON=False
-FQDN='example.com'
