@@ -30,6 +30,8 @@ You can configure the following settings in `tcpbin.py`:
 - **ANON**: boolean. If True, all logs will be anonymised (IP will be hidden)
 - **FQDN**: domain name. This will be the domain name the smtp dumper will reply to `HELO`s as. This should be your domain name.
 
+You can also select and deselect ports to serve on at the bottom of the file in `main`.
+
 ## Why?
 
 The other http(s)bins are annoying to use when you're doing some kind of web exploitation or something low-level. Some of them, for example, reject payloads that are too large. Some even refuse connections if the wrong host header is provided. Others don't support https which is a dealbreaker if there's a same-origin policy in use. This script is also designed to be stupid simple and hassle-free to setup on any server: no Docker, no Vagrant, no Python package dependencies etc. Simply wget the script and run it.
