@@ -83,7 +83,11 @@ class Tube(object):
                 result, self.buf = self.buf[:i+1], self.buf[i+1:]
                 return result
             else:
-                self.buf += self.read()
+                result = self.read()
+                if not result:
+                    print 'EOF on readline'
+                    return None
+                self.buf += result
 
     def __getattr__(self,attr):
         return self._sock.__getattribute__(attr)
@@ -116,6 +120,7 @@ class DumpingServer(object):
         try:
             while True:
                 newsocket, fromaddr = bindsocket.accept()
+                newsocket.settimeout(300.0)
                 threading.Thread(target=self.handle_client, args=(newsocket,fromaddr,i)).start()
                 i += 1
         except KeyboardInterrupt:
@@ -136,7 +141,7 @@ class DumpingServer(object):
         else:
             host = '%s:%s' % (hostname, port)
 
-        f = open(os.path.join(self.LOG_DIR, '%s_%d_%d_%s.txt' % (host,self.port, idx, time.strftime('%s'))), 'wb')
+        f = open(os.path.join(self.LOG_DIR, '%s_%d_%d_%s.txt' % (time.strftime('%s'), idx, self.port, host)), 'wb')
         try:
             sock.settimeout(600)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack('ii', 1, 0))
@@ -204,6 +209,9 @@ class SmtpHandler(ConnectionHandler):
             if l.startswith('DATA'):
                 self.sock.send('354 End data with <CR><LF>.<CR><LF>\n')
                 break
+            if l.startswith('QUIT'):
+                print self.host + ': Successfully RX <<<<'
+                return
             self.sock.send('250 Ok\n')
 
         while True:
@@ -240,3 +248,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
