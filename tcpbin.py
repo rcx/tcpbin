@@ -134,7 +134,10 @@ class DumpingServer(object):
 
     def handle_client(self, sock,addr,idx):
         from_addr, port = addr
-        hostname = socket.gethostbyaddr(from_addr)[0]
+        try:
+            hostname = socket.gethostbyaddr(from_addr)[0]
+        except:
+            hostname = from_addr
         print 'New connection from %s:%s (%s)' % (hostname, port, from_addr)
         if self.anon:
             host = 'anon'
@@ -165,6 +168,8 @@ class ConnectionHandler(object):
 
     def recvline(self):
         l = self.sock.readline()
+        if not l:
+            return l
         self.f.flush()
         self.f.write(l)
         sys.stdout.write(self.host + ': ' + l)
@@ -200,25 +205,25 @@ class SmtpHandler(ConnectionHandler):
     def handle(self):
         print self.host + ': RX begin >>>>'
 
-        self.sock.send('220 ' + FQDN + ' ESMTP Postfix\n')
+        self.sock.send('220 ' + FQDN + ' ESMTP Postfix\r\n')
         self.recvline()
-        self.sock.send('250 ' + FQDN + ', I am glad to meet you\n')
+        self.sock.send('250 ' + FQDN + ', I am glad to meet you\r\n')
 
         while True:
             l = self.recvline()
             if l.startswith('DATA'):
-                self.sock.send('354 End data with <CR><LF>.<CR><LF>\n')
+                self.sock.send('354 End data with <CR><LF>.<CR><LF>\r\n')
                 break
             if l.startswith('QUIT'):
                 print self.host + ': Successfully RX <<<<'
                 return
-            self.sock.send('250 Ok\n')
+            self.sock.send('250 Ok\r\n')
 
         while True:
             l = self.recvline()
             if l == '.\r\n':
                 break
-        self.sock.send('250 Ok: queued as 12345\n')
+        self.sock.send('250 Ok: queued as 12345\r\n')
 
         while True:
             l = self.recvline()
