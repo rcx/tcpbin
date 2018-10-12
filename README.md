@@ -31,6 +31,7 @@ You can configure the following settings in `tcpbin.py`:
 - **FQDN**: domain name. This will be the domain name the smtp dumper will reply to `HELO`s as. This should be your domain name.
 - **FILENAME_TEMPLATE**: filename format string. The logs for a connection will be saved here. Parameters are: `timestamp`, `conn_id`, `local_port`, `remote_host`, `time`.
 - **TIMESTAMP_TEMPLATE**: timestamp format string. Used for strftime for log filename.
+- **LOG_DIR_TEMPLATE**: python expression. gets evaluated by `eval` to choose the directory for the log. You can nest multiple directories; if the path doesn't exist it is created.
 
 You can also select and deselect ports to serve on at the bottom of the file in `main`.
 

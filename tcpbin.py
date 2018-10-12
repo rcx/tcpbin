@@ -10,6 +10,7 @@ KEYFILE='privkey.pem'
 ANON=False
 FQDN='example.com'
 FILENAME_TEMPLATE = '{timestamp}_{conn_id}_{local_port}_{remote_host}.txt'
+LOG_DIR_TEMPLATE = "datetime.datetime.today().strftime('%Y-%m-%d')"
 TIMESTAMP_TEMPLATE = '%s'
 
 import BaseHTTPServer
@@ -142,19 +143,18 @@ class DumpingServer(object):
             hostname = from_addr
         print 'New connection from %s:%s (%s)' % (hostname, port, from_addr)
         if self.anon:
-            host = 'anon'
-        else:
-            host = '%s:%s' % (hostname, port)
+            hostname = 'anon'
+        host = '%s:%s' % (hostname, port)
 
         log_filename = FILENAME_TEMPLATE.format(timestamp=time.strftime(TIMESTAMP_TEMPLATE), conn_id=idx, local_port=self.port, remote_host=host)
-        log_file_dir = datetime.datetime.today().strftime('%Y-%m-%d')
+        log_file_dir = os.path.join(self.LOG_DIR, eval(LOG_DIR_TEMPLATE)) # lol eval
         try:
             os.makedirs(log_file_dir)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 sys.stderr.write('Failed to create log directory %s\n' % (log_file_dir,))
-                log_file_dir = ''
-        f = open(os.path.join(self.LOG_DIR, log_file_dir, log_filename), 'wb')
+                log_file_dir = self.LOG_DIR
+        f = open(os.path.join(log_file_dir, log_filename), 'wb')
         try:
             sock.settimeout(600)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack('ii', 1, 0))
@@ -221,6 +221,9 @@ class SmtpHandler(ConnectionHandler):
 
         while True:
             l = self.recvline()
+            if l == None:
+                print self.host + ': Socket closed <<<<'
+                return
             if l.startswith('DATA'):
                 self.sock.send('354 End data with <CR><LF>.<CR><LF>\r\n')
                 break
