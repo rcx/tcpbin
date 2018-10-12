@@ -9,6 +9,8 @@ CERTFILE='cert.pem'
 KEYFILE='privkey.pem'
 ANON=False
 FQDN='example.com'
+FILENAME_TEMPLATE = '{timestamp}_{conn_id}_{local_port}_{remote_host}.txt'
+TIMESTAMP_TEMPLATE = '%s'
 
 import BaseHTTPServer
 import SimpleHTTPServer
@@ -69,7 +71,7 @@ class ViewerServer(BaseHTTPServer.HTTPServer):
 
 import socket
 import threading
-import struct, os, time,sys, traceback
+import struct, os, time,sys, traceback, errno, datetime
 
 class Tube(object):
     def __init__(self, _sock):
@@ -144,7 +146,15 @@ class DumpingServer(object):
         else:
             host = '%s:%s' % (hostname, port)
 
-        f = open(os.path.join(self.LOG_DIR, '%s_%d_%d_%s.txt' % (time.strftime('%s'), idx, self.port, host)), 'wb')
+        log_filename = FILENAME_TEMPLATE.format(timestamp=time.strftime(TIMESTAMP_TEMPLATE), conn_id=idx, local_port=self.port, remote_host=host)
+        log_file_dir = datetime.datetime.today().strftime('%Y-%m-%d')
+        try:
+            os.makedirs(log_file_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                sys.stderr.write('Failed to create log directory %s\n' % (log_file_dir,))
+                log_file_dir = ''
+        f = open(os.path.join(self.LOG_DIR, log_file_dir, log_filename), 'wb')
         try:
             sock.settimeout(600)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack('ii', 1, 0))

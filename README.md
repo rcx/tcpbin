@@ -6,7 +6,7 @@ You can configure everything in`tcpbin.py`. See the "Additional Configuration" s
 
 ## Quick start
 
-```
+```python
 git clone https://github.com/ecx86/tcpbin.git
 cd tcpbin
 ln -s /etc/example.com/cert.pem cert.pem
@@ -29,6 +29,8 @@ You can configure the following settings in `tcpbin.py`:
 - **KEYFILE**: filename. SSL private key file for serving https.
 - **ANON**: boolean. If True, all logs will be anonymised (IP will be hidden)
 - **FQDN**: domain name. This will be the domain name the smtp dumper will reply to `HELO`s as. This should be your domain name.
+- **FILENAME_TEMPLATE**: filename format string. The logs for a connection will be saved here. Parameters are: `timestamp`, `conn_id`, `local_port`, `remote_host`, `time`.
+- **TIMESTAMP_TEMPLATE**: timestamp format string. Used for strftime for log filename.
 
 You can also select and deselect ports to serve on at the bottom of the file in `main`.
 
