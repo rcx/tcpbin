@@ -4,8 +4,10 @@ It sets up TCP sockets on ports 80(http), 443(https), 25(smtp) to listen for inc
 
 You can configure everything in`tcpbin.py`. See the "Additional Configuration" section below. 
 
-## Quick start
+## Try it online
+There's a public instance available at [tcpb.in](https://tcpb.in:8000). Logs are cleared regularly to prevent abuse, but feel free to use it to quickly share files with your friends, like [transfer.sh](https://transfer.sh) or [mixtape.moe](https://mixtape.moe). Just keep in mind anyone will be able to view your files. If you'd like a private instance, you can self-host this and set a password on it (see below for instructions).
 
+## Quick start
 ```
 git clone https://github.com/ecx86/tcpbin.git
 cd tcpbin
@@ -13,6 +15,8 @@ ln -s /etc/example.com/cert.pem cert.pem
 ln -s /etc/example.com/privkey.pem privkey.pem
 nano motd.txt # optional motd
 service apache2 stop # or nginx
+systemctl disable apache2 # or nginx
+echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse # optional. avoid TIME_WAIT garbage
 nohup python tcpbin.py > /var/log/tcpbin.log &
 ```
 
@@ -37,11 +41,12 @@ You can configure the following settings in `tcpbin.py`:
 - **FILENAME_TEMPLATE**: filename format string. The logs for a connection will be saved here. Parameters are: `timestamp`, `conn_id`, `local_port`, `remote_host`, `time`.
 - **TIMESTAMP_TEMPLATE**: timestamp format string. Used for strftime for log filename.
 - **LOG_DIR_TEMPLATE**: python expression. gets evaluated by `eval` to choose the directory for the log. You can nest multiple directories; if the path doesn't exist it is created.
-- **LOG_VIEWER_RENDERER**: request handler for log viewer. this defaults to SimpleHTTPServer so the script works fine standalone, but if ComplexHTTPServer is available, it uses that. If None, then the server is disabled and you can use Apache or nginx to serve it.
+- **LOG_VIEWER_RENDERER**: request handler for log viewer. this defaults to SimpleHTTPServer so the script works fine standalone, but if ComplexHTTPServer is available, it uses that. If `None`, then the server is disabled and you can use Apache or nginx to serve it.
 
 Lastly, if it exists, `settings.py` is executed last, meaning you can override all of the defaults in there cleanly.
 
 You can select and deselect ports to serve on at the bottom of the file in `main`.
+You can also choose to use nginx or Apache to serve the logs; in fact, this is probably preferable. Simply comment out the server line in main for port 8000.
 
 ## Why?
 

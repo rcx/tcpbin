@@ -14,6 +14,9 @@ FILENAME_TEMPLATE = '{timestamp}_{conn_id}_{local_port}_{remote_host}'
 LOG_DIR_TEMPLATE = "os.path.join(str(self.port), datetime.datetime.today().strftime('%Y-%m-%d'), hostname)"
 TIMESTAMP_TEMPLATE = '%s'
 
+class Disabled(object):
+    pass
+
 try:
     from ComplexHTTPServer import ComplexHTTPRequestHandler
     LOG_VIEWER_RENDERER = ComplexHTTPRequestHandler
@@ -30,6 +33,9 @@ if os.name == 'nt':
 if os.path.isfile('settings.py'):
     print 'Loading settings from settings.py'
     execfile('settings.py') # LOL
+
+if LOG_VIEWER_RENDERER == None:
+    LOG_VIEWER_RENDERER = Disabled
 # ======== END BLOCK ========
 
 
@@ -293,11 +299,11 @@ def main():
         import shutil
         shutil.copyfile(MOTD_FILE, os.path.join(LOG_DIR, MOTD_FILE))
 
-    if LOG_VIEWER_RENDERER:
+    if LOG_VIEWER_RENDERER != Disabled:
         print 'Using %s as the log viewer renderer' % (LOG_VIEWER_RENDERER.__name__)
         ViewerServer(('', LOG_VIEWER_PORT), AUTHKEY, LOG_DIR, SSLSETTINGS if LOG_VIEWER_HTTPS else None).start()
     else:
-        print 'Log viewing server disabled' % (LOG_VIEWER_RENDERER.__name__)
+        print 'Log viewing server disabled'
 
     DumpingServer(80, False, HttpHandler, LOG_DIR, None, ANON).start()
     DumpingServer(443, True, HttpHandler, LOG_DIR, SSLSETTINGS, ANON).start()
