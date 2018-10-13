@@ -24,7 +24,8 @@ except ImportError:
 import os
 if os.name == 'nt':
     # on Windows, a different format is required.
-    TIMESTAMP_TEMPLATE = '%T'
+    print 'On Windows'
+    TIMESTAMP_TEMPLATE = '%H:%M:%S'
 
 if os.path.isfile('settings.py'):
     print 'Loading settings from settings.py'
@@ -184,6 +185,7 @@ class DumpingServer(object):
                 wrapped_sock = SocketTube(sock)
 
             self.handler(wrapped_sock, host, f).handle(logfile=log_full_filename)
+            wrapped_sock.shutdown(socket.SHUT_WR)
             wrapped_sock.close()
         except Exception as e:
             f.write(traceback.format_exc())
@@ -238,8 +240,9 @@ class AnonFileHandler(ConnectionHandler):
             self.f.write(request)
             self.f.flush()
             request = self.sock.read()
-        file_url = ('https' if LOG_VIEWER_HTTPS else 'http') + '://' + FQDN + ':' + str(LOG_VIEWER_PORT) + os.sep + logfile
-        print 'Finished receiving file %s' % (logfile)
+        file_url = ('https' if LOG_VIEWER_HTTPS else 'http') + '://' + FQDN + ':' + str(LOG_VIEWER_PORT) + os.sep + logfile[len(LOG_DIR)+1:]
+        print 'Finished receiving file %s' % (logfile,)
+        print 'Available at %s' % (file_url,)
         self.sock.write(file_url+'\n')
 
 
