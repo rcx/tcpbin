@@ -3,7 +3,7 @@
 MOTD_FILE='motd.txt'
 LOG_DIR='logs'
 LOG_VIEWER_PORT=8000
-LOG_VIEWER_HTTPS=True
+LOG_VIEWER_HTTPS=False
 AUTHKEY='admin:password'
 CERTFILE='cert.pem'
 KEYFILE='privkey.pem'

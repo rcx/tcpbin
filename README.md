@@ -6,7 +6,7 @@ You can configure everything in`tcpbin.py`. See the "Additional Configuration" s
 
 ## Quick start
 
-```python
+```
 git clone https://github.com/ecx86/tcpbin.git
 cd tcpbin
 ln -s /etc/example.com/cert.pem cert.pem
@@ -14,6 +14,11 @@ ln -s /etc/example.com/privkey.pem privkey.pem
 nano motd.txt # optional motd
 service apache2 stop # or nginx
 nohup python tcpbin.py > /var/log/tcpbin.log &
+```
+
+## Even quicker start
+```
+curl https://raw.githubusercontent.com/ecx86/tcpbin/master/tcpbin.py | python
 ```
 
 ## Advanced configuration
