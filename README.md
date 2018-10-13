@@ -46,6 +46,7 @@ You can configure the following settings in `tcpbin.py`:
 Lastly, if it exists, `settings.py` is executed last, meaning you can override all of the defaults in there cleanly.
 
 You can select and deselect ports to serve on at the bottom of the file in `main`.
+You can also choose to use nginx or Apache to serve the logs; in fact, this is probably preferable. Simply comment out the server line in main for port 8000.
 
 ## Why?
 
