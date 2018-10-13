@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# ======== CONFIGURATION BLOCK ========
 MOTD_FILE='motd.txt'
 LOG_DIR='logs'
 LOG_VIEWER_PORT=8000
@@ -19,6 +20,13 @@ try:
 except ImportError:
     from SimpleHTTPServer import SimpleHTTPRequestHandler
     REQUEST_HANDLER = SimpleHTTPRequestHandler
+
+import os
+if os.name == 'nt':
+    # on Windows, a different format is required.
+    TIMESTAMP_TEMPLATE = '%T'
+# ======== END BLOCK ========
+
 
 import BaseHTTPServer
 import base64
@@ -77,7 +85,7 @@ class ViewerServer(BaseHTTPServer.HTTPServer):
 
 import socket
 import threading
-import struct, os, time,sys, traceback, errno, datetime
+import struct, time,sys, traceback, errno, datetime
 
 class Tube(object):
     def __init__(self, _sock):
@@ -152,6 +160,8 @@ class DumpingServer(object):
         host = '%s:%s' % (hostname, port)
 
         log_filename = FILENAME_TEMPLATE.format(timestamp=time.strftime(TIMESTAMP_TEMPLATE), conn_id=idx, local_port=self.port, remote_host=host)
+        if os.name == 'nt':
+            log_filename = log_filename.replace(':', ';') # no colons are allowed on windows
         log_file_dir = os.path.join(self.LOG_DIR, eval(LOG_DIR_TEMPLATE)) # lol eval
         try:
             os.makedirs(log_file_dir)
@@ -159,7 +169,8 @@ class DumpingServer(object):
             if e.errno != errno.EEXIST:
                 sys.stderr.write('Failed to create log directory %s\n' % (log_file_dir,))
                 log_file_dir = self.LOG_DIR
-        f = open(os.path.join(log_file_dir, log_filename), 'wb')
+        log_full_filename = os.path.join(log_file_dir, log_filename)
+        f = open(log_full_filename, 'wb')
         try:
             sock.settimeout(600)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack('ii', 1, 0))
@@ -168,7 +179,7 @@ class DumpingServer(object):
             else:
                 wrapped_sock = SocketTube(sock)
 
-            self.handler(wrapped_sock, host, f).handle()
+            self.handler(wrapped_sock, host, f).handle(logfile=log_full_filename)
             wrapped_sock.close()
         except Exception as e:
             f.write(traceback.format_exc())
@@ -207,7 +218,7 @@ class SSLSettings(object):
 SSLSETTINGS = SSLSettings(CERTFILE, KEYFILE)
 
 class HttpHandler(ConnectionHandler):
-    def handle(self):
+    def handle(self, **kwargs):
         request = self.sock.read()
         while request:
             print(request)
@@ -216,8 +227,20 @@ class HttpHandler(ConnectionHandler):
             request = self.sock.read()
         self.sock.write("HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n")
 
+class AnonFileHandler(ConnectionHandler):
+    def handle(self, logfile=''):
+        request = self.sock.read()
+        while request:
+            self.f.write(request)
+            self.f.flush()
+            request = self.sock.read()
+        file_url = ('https' if LOG_VIEWER_HTTPS else 'http') + '://' + FQDN + ':' + str(LOG_VIEWER_PORT) + os.sep + logfile
+        print 'Finished receiving file %s' % (logfile)
+        self.sock.write(file_url+'\n')
+
+
 class SmtpHandler(ConnectionHandler):
-    def handle(self):
+    def handle(self, **kwargs):
         print self.host + ': RX begin >>>>'
 
         self.sock.send('220 ' + FQDN + ' ESMTP Postfix\r\n')
@@ -259,8 +282,8 @@ def main():
     ViewerServer(('', LOG_VIEWER_PORT), AUTHKEY, LOG_DIR, SSLSETTINGS if LOG_VIEWER_HTTPS else None).start()
     DumpingServer(80, False, HttpHandler, LOG_DIR, None, ANON).start()
     DumpingServer(443, True, HttpHandler, LOG_DIR, SSLSETTINGS, ANON).start()
-    DumpingServer(6969, False, HttpHandler, LOG_DIR, None, True).start()
-    DumpingServer(6970, True, HttpHandler, LOG_DIR, SSLSETTINGS, True).start()
+    DumpingServer(6969, False, AnonFileHandler, LOG_DIR, None, True).start()
+    DumpingServer(6970, True, AnonFileHandler, LOG_DIR, SSLSETTINGS, True).start()
     DumpingServer(25, False, SmtpHandler, LOG_DIR, None, ANON).start()
 
     try:
