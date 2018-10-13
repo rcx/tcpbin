@@ -4,8 +4,10 @@ It sets up TCP sockets on ports 80(http), 443(https), 25(smtp) to listen for inc
 
 You can configure everything in`tcpbin.py`. See the "Additional Configuration" section below. 
 
-## Quick start
+## Try it online
+There's a public instance available at [tcpb.in](http://tcpb.in:8000). Logs are cleared regularly to prevent abuse, but feel free to use it to quickly share files with your friends, like [transfer.sh](https://transfer.sh) or [mixtape.moe](https://mixtape.moe).
 
+## Quick start
 ```
 git clone https://github.com/ecx86/tcpbin.git
 cd tcpbin
@@ -13,6 +15,8 @@ ln -s /etc/example.com/cert.pem cert.pem
 ln -s /etc/example.com/privkey.pem privkey.pem
 nano motd.txt # optional motd
 service apache2 stop # or nginx
+systemctl disable apache2 # or nginx
+echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse # optional. avoid TIME_WAIT garbage
 nohup python tcpbin.py > /var/log/tcpbin.log &
 ```
 
