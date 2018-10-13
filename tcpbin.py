@@ -16,22 +16,26 @@ TIMESTAMP_TEMPLATE = '%s'
 
 try:
     from ComplexHTTPServer import ComplexHTTPRequestHandler
-    REQUEST_HANDLER = ComplexHTTPRequestHandler
+    LOG_VIEWER_RENDERER = ComplexHTTPRequestHandler
 except ImportError:
     from SimpleHTTPServer import SimpleHTTPRequestHandler
-    REQUEST_HANDLER = SimpleHTTPRequestHandler
+    LOG_VIEWER_RENDERER = SimpleHTTPRequestHandler
 
 import os
 if os.name == 'nt':
     # on Windows, a different format is required.
     TIMESTAMP_TEMPLATE = '%T'
+
+if os.path.isfile('settings.py'):
+    print 'Loading settings from settings.py'
+    execfile('settings.py') # LOL
 # ======== END BLOCK ========
 
 
 import BaseHTTPServer
 import base64
 
-class AuthHandler(REQUEST_HANDLER):
+class AuthHandler(LOG_VIEWER_RENDERER):
     def do_HEAD(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -49,15 +53,15 @@ class AuthHandler(REQUEST_HANDLER):
                 self.do_AUTHHEAD()
                 self.wfile.write('Unauthorized')
             elif self.headers.getheader('Authorization') == 'Basic ' + base64.b64encode(self.server.authkey):
-                REQUEST_HANDLER.do_GET(self)
+                LOG_VIEWER_RENDERER.do_GET(self)
             else:
                 self.do_AUTHHEAD()
                 self.wfile.write('Unauthorized')
         else:
-            REQUEST_HANDLER.do_GET(self)
+            LOG_VIEWER_RENDERER.do_GET(self)
 
     def translate_path(self, path):
-        path = REQUEST_HANDLER.translate_path(self, path)
+        path = LOG_VIEWER_RENDERER.translate_path(self, path)
         relpath = os.path.relpath(path, os.getcwd())
         fullpath = os.path.join(self.server.LOG_DIR, relpath)
         return fullpath
@@ -279,6 +283,7 @@ def main():
         import shutil
         shutil.copyfile(MOTD_FILE, os.path.join(LOG_DIR, MOTD_FILE))
 
+    print 'Using %s as the log viewer renderer' % (LOG_VIEWER_RENDERER.__name__)
     ViewerServer(('', LOG_VIEWER_PORT), AUTHKEY, LOG_DIR, SSLSETTINGS if LOG_VIEWER_HTTPS else None).start()
     DumpingServer(80, False, HttpHandler, LOG_DIR, None, ANON).start()
     DumpingServer(443, True, HttpHandler, LOG_DIR, SSLSETTINGS, ANON).start()
