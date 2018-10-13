@@ -5,7 +5,7 @@ It sets up TCP sockets on ports 80(http), 443(https), 25(smtp) to listen for inc
 You can configure everything in`tcpbin.py`. See the "Additional Configuration" section below. 
 
 ## Try it online
-There's a public instance available at [tcpb.in](https://tcpb.in:8000). Logs are cleared regularly to prevent abuse, but feel free to use it to quickly share files with your friends, like [transfer.sh](https://transfer.sh) or [mixtape.moe](https://mixtape.moe).
+There's a public instance available at [tcpb.in](https://tcpb.in:8000). Logs are cleared regularly to prevent abuse, but feel free to use it to quickly share files with your friends, like [transfer.sh](https://transfer.sh) or [mixtape.moe](https://mixtape.moe). Just keep in mind anyone will be able to view your files. If you'd like a private instance, you can self-host this and set a password on it (see below for instructions).
 
 ## Quick start
 ```
