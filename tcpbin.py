@@ -10,7 +10,7 @@ CERTFILE='cert.pem'
 KEYFILE='privkey.pem'
 ANON=False
 FQDN='example.com'
-FILENAME_TEMPLATE = '{timestamp}_{conn_id}_{local_port}_{remote_host}.txt'
+FILENAME_TEMPLATE = '{timestamp}_{conn_id}_{local_port}_{remote_host}'
 LOG_DIR_TEMPLATE = "os.path.join(str(self.port), datetime.datetime.today().strftime('%Y-%m-%d'), hostname)"
 TIMESTAMP_TEMPLATE = '%s'
 
@@ -164,7 +164,7 @@ class DumpingServer(object):
             hostname = 'anon'
         host = '%s:%s' % (hostname, port)
 
-        log_filename = FILENAME_TEMPLATE.format(timestamp=time.strftime(TIMESTAMP_TEMPLATE), conn_id=idx, local_port=self.port, remote_host=host)
+        log_filename = FILENAME_TEMPLATE.format(timestamp=time.strftime(TIMESTAMP_TEMPLATE), conn_id=idx, local_port=self.port, remote_host=host) + self.handler.get_file_ext()
         if os.name == 'nt':
             log_filename = log_filename.replace(':', ';') # no colons are allowed on windows
         log_file_dir = os.path.join(self.LOG_DIR, eval(LOG_DIR_TEMPLATE)) # lol eval
@@ -207,6 +207,9 @@ class ConnectionHandler(object):
         sys.stdout.write(self.host + ': ' + l)
         return l
 
+    @staticmethod
+    def get_file_ext():
+        return '.txt'
 
 
 import ssl
@@ -244,6 +247,10 @@ class AnonFileHandler(ConnectionHandler):
         print 'Finished receiving file %s' % (logfile,)
         print 'Available at %s' % (file_url,)
         self.sock.write(file_url+'\n')
+
+    @staticmethod
+    def get_file_ext():
+        return ''
 
 
 class SmtpHandler(ConnectionHandler):
