@@ -10,15 +10,20 @@ KEYFILE='privkey.pem'
 ANON=False
 FQDN='example.com'
 FILENAME_TEMPLATE = '{timestamp}_{conn_id}_{local_port}_{remote_host}.txt'
-LOG_DIR_TEMPLATE = "datetime.datetime.today().strftime('%Y-%m-%d')"
+LOG_DIR_TEMPLATE = "os.path.join(str(self.port), datetime.datetime.today().strftime('%Y-%m-%d'), hostname)"
 TIMESTAMP_TEMPLATE = '%s'
 
+try:
+    from ComplexHTTPServer import ComplexHTTPRequestHandler
+    REQUEST_HANDLER = ComplexHTTPRequestHandler
+except ImportError:
+    from SimpleHTTPServer import SimpleHTTPRequestHandler
+    REQUEST_HANDLER = SimpleHTTPRequestHandler
+
 import BaseHTTPServer
-import SimpleHTTPServer
 import base64
 
-
-class AuthHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class AuthHandler(REQUEST_HANDLER):
     def do_HEAD(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -36,15 +41,15 @@ class AuthHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 self.do_AUTHHEAD()
                 self.wfile.write('Unauthorized')
             elif self.headers.getheader('Authorization') == 'Basic ' + base64.b64encode(self.server.authkey):
-                SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+                REQUEST_HANDLER.do_GET(self)
             else:
                 self.do_AUTHHEAD()
                 self.wfile.write('Unauthorized')
         else:
-            SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+            REQUEST_HANDLER.do_GET(self)
 
     def translate_path(self, path):
-        path = SimpleHTTPServer.SimpleHTTPRequestHandler.translate_path(self, path)
+        path = REQUEST_HANDLER.translate_path(self, path)
         relpath = os.path.relpath(path, os.getcwd())
         fullpath = os.path.join(self.server.LOG_DIR, relpath)
         return fullpath
@@ -266,4 +271,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
