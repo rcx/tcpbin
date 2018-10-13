@@ -293,8 +293,12 @@ def main():
         import shutil
         shutil.copyfile(MOTD_FILE, os.path.join(LOG_DIR, MOTD_FILE))
 
-    print 'Using %s as the log viewer renderer' % (LOG_VIEWER_RENDERER.__name__)
-    ViewerServer(('', LOG_VIEWER_PORT), AUTHKEY, LOG_DIR, SSLSETTINGS if LOG_VIEWER_HTTPS else None).start()
+    if LOG_VIEWER_RENDERER:
+        print 'Using %s as the log viewer renderer' % (LOG_VIEWER_RENDERER.__name__)
+        ViewerServer(('', LOG_VIEWER_PORT), AUTHKEY, LOG_DIR, SSLSETTINGS if LOG_VIEWER_HTTPS else None).start()
+    else:
+        print 'Log viewing server disabled' % (LOG_VIEWER_RENDERER.__name__)
+
     DumpingServer(80, False, HttpHandler, LOG_DIR, None, ANON).start()
     DumpingServer(443, True, HttpHandler, LOG_DIR, SSLSETTINGS, ANON).start()
     DumpingServer(6969, False, AnonFileHandler, LOG_DIR, None, True).start()

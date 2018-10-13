@@ -37,7 +37,7 @@ You can configure the following settings in `tcpbin.py`:
 - **FILENAME_TEMPLATE**: filename format string. The logs for a connection will be saved here. Parameters are: `timestamp`, `conn_id`, `local_port`, `remote_host`, `time`.
 - **TIMESTAMP_TEMPLATE**: timestamp format string. Used for strftime for log filename.
 - **LOG_DIR_TEMPLATE**: python expression. gets evaluated by `eval` to choose the directory for the log. You can nest multiple directories; if the path doesn't exist it is created.
-- **LOG_VIEWER_RENDERER**: request handler for log viewer. this defaults to SimpleHTTPServer so the script works fine standalone, but if ComplexHTTPServer is available, it uses that.
+- **LOG_VIEWER_RENDERER**: request handler for log viewer. this defaults to SimpleHTTPServer so the script works fine standalone, but if ComplexHTTPServer is available, it uses that. If None, then the server is disabled and you can use Apache or nginx to serve it.
 
 Lastly, if it exists, `settings.py` is executed last, meaning you can override all of the defaults in there cleanly.
 
