@@ -50,7 +50,7 @@ You can also choose to use nginx or Apache to serve the logs; in fact, this is p
 
 ## Why?
 
-The other http(s)bins are annoying to use when you're doing some kind of web exploitation or something low-level. Some of them, for example, reject payloads that are too large. Some even refuse connections if the wrong host header is provided. Others don't support https which is a dealbreaker if there's a same-origin policy in use. This script is also designed to be stupid simple and hassle-free to setup on any server: no Docker, no Vagrant, no Python package dependencies etc. Simply wget the script and run it.
+The other http(s)bins are annoying to use when you're doing some kind of web exploitation or something low-level. Some of them, for example, reject payloads that are too large. Some even refuse connections if the wrong host header is provided. Others don't support https which is a dealbreaker if there's a CSP in use. This script is also designed to be stupid simple and hassle-free to setup on any server: no Docker, no Vagrant, no Python package dependencies etc. Simply wget the script and run it.
 
 ## Closing remarks and thanks
 
