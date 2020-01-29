@@ -101,11 +101,11 @@ import struct, time,sys, traceback, errno, datetime
 class Tube(object):
     def __init__(self, _sock):
         self._sock = _sock
-        self.buf = ''
+        self.buf = b''
 
     def readline(self):
         while True:
-            i = self.buf.find('\n')
+            i = self.buf.find(b'\n')
             if i >= 0:
                 result, self.buf = self.buf[:i+1], self.buf[i+1:]
                 return result
@@ -194,7 +194,7 @@ class DumpingServer(object):
             wrapped_sock.shutdown(socket.SHUT_WR)
             wrapped_sock.close()
         except Exception as e:
-            f.write(traceback.format_exc())
+            f.write(traceback.format_exc().encode('utf-8'))
         f.flush()
         f.close()
 
@@ -210,7 +210,7 @@ class ConnectionHandler(object):
             return l
         self.f.flush()
         self.f.write(l)
-        sys.stdout.write(self.host + ': ' + l)
+        sys.stdout.write(self.host + ': ' + l.decode('utf-8'))
         return l
 
     @staticmethod
@@ -240,7 +240,7 @@ class HttpHandler(ConnectionHandler):
             self.f.write(request)
             self.f.flush()
             request = self.sock.read()
-        self.sock.write("HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n")
+        self.sock.write(b"HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n")
 
 class AnonFileHandler(ConnectionHandler):
     def handle(self, logfile=''):
@@ -252,7 +252,7 @@ class AnonFileHandler(ConnectionHandler):
         file_url = ('https' if LOG_VIEWER_HTTPS else 'http') + '://' + FQDN + ':' + str(LOG_VIEWER_PORT) + os.sep + logfile[len(LOG_DIR)+1:]
         print('Finished receiving file %s' % (logfile,))
         print('Available at %s' % (file_url,))
-        self.sock.write(file_url+'\n')
+        self.sock.write((file_url+'\n').encode('utf-8'))
 
     @staticmethod
     def get_file_ext():
@@ -263,32 +263,38 @@ class SmtpHandler(ConnectionHandler):
     def handle(self, **kwargs):
         print(self.host + ': RX begin >>>>')
 
-        self.sock.send('220 ' + FQDN + ' ESMTP Postfix\r\n')
+        self.sock.send((b'220 ' + FQDN.encode('ascii') + b' ESMTP Postfix\r\n'))
         self.recvline()
-        self.sock.send('250 ' + FQDN + ', I am glad to meet you\r\n')
+        self.sock.send(b'250 ' + FQDN.encode('ascii') + b', I am glad to meet you\r\n')
 
         while True:
             l = self.recvline()
             if l == None:
                 print(self.host + ': Socket closed <<<<')
                 return
-            if l.startswith('DATA'):
-                self.sock.send('354 End data with <CR><LF>.<CR><LF>\r\n')
+            if l.startswith(b'DATA'):
+                self.sock.send(b'354 End data with <CR><LF>.<CR><LF>\r\n')
                 break
-            if l.startswith('QUIT'):
+            if l.startswith(b'QUIT'):
                 print(self.host + ': Successfully RX <<<<')
                 return
-            self.sock.send('250 Ok\r\n')
+            self.sock.send(b'250 Ok\r\n')
 
         while True:
             l = self.recvline()
-            if l == '.\r\n':
+            if l == None:
+                print(self.host + ': Socket closed <<<<')
+                return
+            if l == b'.\r\n':
                 break
-        self.sock.send('250 Ok: queued as 12345\r\n')
+        self.sock.send(b'250 Ok: queued as 12345\r\n')
 
         while True:
             l = self.recvline()
-            if l.startswith('QUIT'):
+            if l == None:
+                print(self.host + ': Socket closed <<<<')
+                return
+            if l.startswith(b'QUIT'):
                 break
         print(self.host + ': Successfully RX <<<<')
 
