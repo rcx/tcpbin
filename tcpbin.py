@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # ======== CONFIGURATION BLOCK ========
 MOTD_FILE='motd.txt'
