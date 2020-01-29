@@ -21,25 +21,25 @@ try:
     from ComplexHTTPServer import ComplexHTTPRequestHandler
     LOG_VIEWER_RENDERER = ComplexHTTPRequestHandler
 except ImportError:
-    from SimpleHTTPServer import SimpleHTTPRequestHandler
+    from http.server import SimpleHTTPRequestHandler
     LOG_VIEWER_RENDERER = SimpleHTTPRequestHandler
 
 import os
 if os.name == 'nt':
     # on Windows, a different format is required.
-    print 'On Windows'
+    print('On Windows')
     TIMESTAMP_TEMPLATE = '%H:%M:%S'
 
 if os.path.isfile('settings.py'):
-    print 'Loading settings from settings.py'
-    execfile('settings.py') # LOL
+    print('Loading settings from settings.py')
+    exec(compile(open('settings.py').read(), 'settings.py', 'exec')) # LOL
 
 if LOG_VIEWER_RENDERER == None:
     LOG_VIEWER_RENDERER = Disabled
 # ======== END BLOCK ========
 
 
-import BaseHTTPServer
+import http.server
 import base64
 
 class AuthHandler(LOG_VIEWER_RENDERER):
@@ -73,20 +73,20 @@ class AuthHandler(LOG_VIEWER_RENDERER):
         fullpath = os.path.join(self.server.LOG_DIR, relpath)
         return fullpath
 
-class ViewerServer(BaseHTTPServer.HTTPServer):
+class ViewerServer(http.server.HTTPServer):
     """The main server, you pass in base_path which is the path you want to serve requests from"""
     def __init__(self, server_address, authkey='', LOG_DIR='logs', ssl_settings = None):
         self.LOG_DIR = LOG_DIR
         self.authkey = authkey
         self.ssl_settings = ssl_settings
-        BaseHTTPServer.HTTPServer.__init__(self, server_address, AuthHandler)
+        http.server.HTTPServer.__init__(self, server_address, AuthHandler)
         if self.ssl_settings:
             self.socket = self.ssl_settings.wrap_socket(self.socket)
 
     def serve_forever(self,):
         socket_addr = self.socket.getsockname()
-        print "Serving " + ('HTTPS' if self.ssl_settings else 'HTTP') + " on", socket_addr[0], "port", socket_addr[1], "..."
-        BaseHTTPServer.HTTPServer.serve_forever(self)
+        print("Serving " + ('HTTPS' if self.ssl_settings else 'HTTP') + " on", socket_addr[0], "port", socket_addr[1], "...")
+        http.server.HTTPServer.serve_forever(self)
 
     def start(self):
         t = threading.Thread(target=self.serve_forever)
@@ -112,7 +112,7 @@ class Tube(object):
             else:
                 result = self.read()
                 if not result:
-                    print 'EOF on readline'
+                    print('EOF on readline')
                     return None
                 self.buf += result
 
@@ -141,7 +141,7 @@ class DumpingServer(object):
         bindsocket = socket.socket()
         bindsocket.bind(('', self.port))
         bindsocket.listen(5)
-        print 'Serving on port %d ...' % (self.port,)
+        print('Serving on port %d ...' % (self.port,))
 
         i = 0
         try:
@@ -165,7 +165,7 @@ class DumpingServer(object):
             hostname = socket.gethostbyaddr(from_addr)[0]
         except:
             hostname = from_addr
-        print 'New connection from %s:%s (%s)' % (hostname, port, from_addr)
+        print('New connection from %s:%s (%s)' % (hostname, port, from_addr))
         if self.anon:
             hostname = 'anon'
         host = '%s:%s' % (hostname, port)
@@ -250,8 +250,8 @@ class AnonFileHandler(ConnectionHandler):
             self.f.flush()
             request = self.sock.read()
         file_url = ('https' if LOG_VIEWER_HTTPS else 'http') + '://' + FQDN + ':' + str(LOG_VIEWER_PORT) + os.sep + logfile[len(LOG_DIR)+1:]
-        print 'Finished receiving file %s' % (logfile,)
-        print 'Available at %s' % (file_url,)
+        print('Finished receiving file %s' % (logfile,))
+        print('Available at %s' % (file_url,))
         self.sock.write(file_url+'\n')
 
     @staticmethod
@@ -261,7 +261,7 @@ class AnonFileHandler(ConnectionHandler):
 
 class SmtpHandler(ConnectionHandler):
     def handle(self, **kwargs):
-        print self.host + ': RX begin >>>>'
+        print(self.host + ': RX begin >>>>')
 
         self.sock.send('220 ' + FQDN + ' ESMTP Postfix\r\n')
         self.recvline()
@@ -270,13 +270,13 @@ class SmtpHandler(ConnectionHandler):
         while True:
             l = self.recvline()
             if l == None:
-                print self.host + ': Socket closed <<<<'
+                print(self.host + ': Socket closed <<<<')
                 return
             if l.startswith('DATA'):
                 self.sock.send('354 End data with <CR><LF>.<CR><LF>\r\n')
                 break
             if l.startswith('QUIT'):
-                print self.host + ': Successfully RX <<<<'
+                print(self.host + ': Successfully RX <<<<')
                 return
             self.sock.send('250 Ok\r\n')
 
@@ -290,7 +290,7 @@ class SmtpHandler(ConnectionHandler):
             l = self.recvline()
             if l.startswith('QUIT'):
                 break
-        print self.host + ': Successfully RX <<<<'
+        print(self.host + ': Successfully RX <<<<')
 
 def main():
     if not os.path.exists(LOG_DIR):
@@ -300,10 +300,10 @@ def main():
         shutil.copyfile(MOTD_FILE, os.path.join(LOG_DIR, MOTD_FILE))
 
     if LOG_VIEWER_RENDERER != Disabled:
-        print 'Using %s as the log viewer renderer' % (LOG_VIEWER_RENDERER.__name__)
+        print('Using %s as the log viewer renderer' % (LOG_VIEWER_RENDERER.__name__))
         ViewerServer(('', LOG_VIEWER_PORT), AUTHKEY, LOG_DIR, SSLSETTINGS if LOG_VIEWER_HTTPS else None).start()
     else:
-        print 'Log viewing server disabled'
+        print('Log viewing server disabled')
 
     DumpingServer(80, False, HttpHandler, LOG_DIR, None, ANON).start()
     DumpingServer(443, True, HttpHandler, LOG_DIR, SSLSETTINGS, ANON).start()

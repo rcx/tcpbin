@@ -12,20 +12,20 @@ __all__ = ["ComplexHTTPRequestHandler"]
 
 import os
 import posixpath
-import BaseHTTPServer
-import urllib
+import http.server
+import urllib.request, urllib.parse, urllib.error
 import cgi
 import sys
 import shutil
 import mimetypes
 import time,datetime
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 
 
-class ComplexHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+class ComplexHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
     """Complex HTTP request handler with GET and HEAD commands.
 
@@ -129,7 +129,7 @@ class ComplexHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         list.sort(key=lambda a: a.lower())
         list.sort(key=lambda x: os.path.getmtime(os.path.join(path,x)), reverse=True)
         f = StringIO()
-        displaypath = cgi.escape(urllib.unquote(self.path))
+        displaypath = cgi.escape(urllib.parse.unquote(self.path))
         f.write('<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">')
         f.write("<html>\n<title>Directory listing for %s</title>\n" % displaypath)
         f.write("<body>\n<h1>Directory listing for %s</h1>\n" % displaypath)
@@ -148,7 +148,7 @@ class ComplexHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             modified = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(filename)))
             size = self.sizeof_fmt(self.get_size(filename))
             f.write('<tr><td><a href="%s">%s</a></td><td>%s</td><td>%s</td>\n'
-                    % (urllib.quote(linkname), cgi.escape(displayname), cgi.escape(modified), cgi.escape(size)))
+                    % (urllib.parse.quote(linkname), cgi.escape(displayname), cgi.escape(modified), cgi.escape(size)))
         f.write("</table>\n<hr>\n</body>\n</html>\n")
         length = f.tell()
         f.seek(0)
@@ -170,9 +170,9 @@ class ComplexHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # abandon query parameters
         path = path.split('?',1)[0]
         path = path.split('#',1)[0]
-        path = posixpath.normpath(urllib.unquote(path))
+        path = posixpath.normpath(urllib.parse.unquote(path))
         words = path.split('/')
-        words = filter(None, words)
+        words = [_f for _f in words if _f]
         path = os.getcwd()
         for word in words:
             drive, word = os.path.splitdrive(word)
@@ -234,8 +234,8 @@ class ComplexHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 
 def test(HandlerClass = ComplexHTTPRequestHandler,
-         ServerClass = BaseHTTPServer.HTTPServer):
-    BaseHTTPServer.test(HandlerClass, ServerClass)
+         ServerClass = http.server.HTTPServer):
+    http.server.test(HandlerClass, ServerClass)
 
 
 if __name__ == '__main__':

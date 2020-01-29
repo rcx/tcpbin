@@ -17,13 +17,16 @@ nano motd.txt # optional motd
 service apache2 stop # or nginx
 systemctl disable apache2 # or nginx
 echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse # optional. avoid TIME_WAIT garbage
-nohup python tcpbin.py > /var/log/tcpbin.log &
+nohup python3 tcpbin.py > /var/log/tcpbin.log &
 ```
 
 ## Even quicker start
 ```
-curl https://raw.githubusercontent.com/ecx86/tcpbin/master/tcpbin.py | python
+curl https://raw.githubusercontent.com/ecx86/tcpbin/master/tcpbin.py | python3
 ```
+
+## Python 2 vs Python 3
+This script has been updated to support Python 3. For the Python 2 version check out the git tag `python2`.
 
 ## Advanced configuration
 
