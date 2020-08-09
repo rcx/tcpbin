@@ -5,11 +5,11 @@ It sets up TCP sockets on ports 80(http), 443(https), 25(smtp) to listen for inc
 You can configure everything in`tcpbin.py`. See the "Additional Configuration" section below. 
 
 ## Try it online
-There's a public instance available at [tcpb.in](https://tcpb.in:8000). Logs are cleared regularly to prevent abuse, but feel free to use it to quickly share files with your friends, like [transfer.sh](https://transfer.sh) or [mixtape.moe](https://mixtape.moe). Just keep in mind anyone will be able to view your files. If you'd like a private instance, you can self-host this and set a password on it (see below for instructions). At [tcpb.in:9999](http://tcpb.in:9999) there is also a [service which echoes your IP address](https://gist.github.com/ecx86/f569dd449ce7919db96523f2c18cd82f). At [tcpb.in:5000](https://tcpb.in:5000) there is a [webapp which can parse your dumped emails](https://github.com/ecx86/email-parser).
+There's a public instance available at [tcpb.in](https://tcpb.in:8000). Logs are cleared regularly to prevent abuse, but feel free to use it to quickly share files with your friends, like [transfer.sh](https://transfer.sh) or [mixtape.moe](https://mixtape.moe). Just keep in mind anyone will be able to view your files. If you'd like a private instance, you can self-host this and set a password on it (see below for instructions). At [tcpb.in:9999](http://tcpb.in:9999) there is also a [service which echoes your IP address](https://gist.github.com/rcx/f569dd449ce7919db96523f2c18cd82f). At [tcpb.in:5000](https://tcpb.in:5000) there is a [webapp which can parse your dumped emails](https://github.com/rcx/email-parser).
 
 ## Quick start
 ```
-git clone https://github.com/ecx86/tcpbin.git
+git clone https://github.com/rcx/tcpbin.git
 cd tcpbin
 ln -s /etc/example.com/cert.pem cert.pem
 ln -s /etc/example.com/privkey.pem privkey.pem
@@ -22,7 +22,7 @@ nohup python3 tcpbin.py > /var/log/tcpbin.log &
 
 ## Even quicker start
 ```
-curl https://raw.githubusercontent.com/ecx86/tcpbin/master/tcpbin.py | python3
+curl https://raw.githubusercontent.com/rcx/tcpbin/master/tcpbin.py | python3
 ```
 
 ## Python 2 vs Python 3
