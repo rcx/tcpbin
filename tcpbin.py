@@ -210,7 +210,7 @@ class ConnectionHandler(object):
             return l
         self.f.flush()
         self.f.write(l)
-        sys.stdout.write(self.host + ': ' + l.decode('utf-8'))
+        sys.stdout.write(self.host + ': ' + l.decode('utf-8', errors="ignore"))
         return l
 
     @staticmethod
