@@ -168,7 +168,7 @@ class DumpingServer(object):
         print('New connection from %s:%s (%s)' % (hostname, port, from_addr))
         if self.anon:
             hostname = 'anon'
-        host = '%s:%s' % (hostname, port)
+        host = '%s_%s:%s' % (from_addr, hostname, port)
 
         log_filename = FILENAME_TEMPLATE.format(timestamp=time.strftime(TIMESTAMP_TEMPLATE), conn_id=idx, local_port=self.port, remote_host=host) + self.handler.get_file_ext()
         if os.name == 'nt':
